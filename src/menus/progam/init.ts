@@ -97,7 +97,7 @@ export async function programInitMenu() {
           const passengerName = row[15] as string;
           const service = row[10] as string;
 
-          if (cc && service && tax && passengerName) {
+          if (cc && passengerName) {
             const taxValue = typeof tax === "number" ? tax : parseFloat(tax as string);
             const totalValue = typeof total === "number" ? total : parseFloat(total as string);
 
@@ -131,20 +131,6 @@ export async function programInitMenu() {
                       tempSums[key].commission += commission;
                       tempSums[key].tax += taxValue;
 
-                      if (hcType === "Despesa") {
-                        if (serviceKey === "AÉREO/RODOVIÁRIO/CARRO") {
-                          tempSums[key].service = "190";
-                        } else if (serviceKey === "HOTEL") {
-                          tempSums[key].service = "196";
-                        }
-                      } else if (hcType === "Custo") {
-                        if (serviceKey === "AÉREO/RODOVIÁRIO/CARRO") {
-                          tempSums[key].service = "194";
-                        } else if (serviceKey === "HOTEL") {
-                          tempSums[key].service = "192";
-                        }
-                      }
-
                       vollData[rowIndex][26] = commission;
                       break;
                     } else {
@@ -172,7 +158,7 @@ export async function programInitMenu() {
                 const key = `${cc}-${serviceKey}`;
 
                 if (!tempSums[key]) {
-                  tempSums[key] = { commission: 0, tax: 0, service: serviceKey, type: "Desconhecido" };
+                  tempSums[key] = { commission: 0, tax: 0, service: serviceKey, type: "Despesa" };
                 }
 
                 tempSums[key].commission += commission;
@@ -185,12 +171,12 @@ export async function programInitMenu() {
         }
 
         for (const key in tempSums) {
-          const { commission, tax, service, type } = tempSums[key];
-          const cc = key.split("-")[0];
+            const { commission, tax, type } = tempSums[key];
+            const [cc, serviceValue] = key.split("-");
 
           ccData.push({
             cc,
-            service,
+            service: serviceValue,
             commission: parseFloat(commission.toFixed(2)),
             type,
             tax: parseFloat(tax.toFixed(2)),
@@ -199,24 +185,30 @@ export async function programInitMenu() {
 
         const sapData: (string | number)[][] = [];
         for (const entry of ccData) {
-          const { cc, tax, commission, type } = entry;
+          const { cc, tax, commission, type, service } = entry;
 
           let svCodeTax: string = "";
           let svCodeCommission: string = "";
           let typeDescription: string = "";
 
           if (type === "Despesa") {
-            svCodeTax = tax > 0 ? `SV.190` : "";
-            svCodeCommission = commission > 0 ? `SV.189` : "";
+            if (service === "AÉREO/RODOVIÁRIO/CARRO") {
+              svCodeTax = tax > 0 ? `SV.190` : "";
+              svCodeCommission = commission > 0 ? `SV.189` : "";
+            } else if (service === "HOTEL") {
+              svCodeTax = tax > 0 ? `SV.196` : "";
+              svCodeCommission = commission > 0 ? `SV.195` : "";
+            }
             typeDescription = "Compra Despesa";
           } else if (type === "Custo") {
-            svCodeTax = tax > 0 ? `SV.194` : "";
-            svCodeCommission = commission > 0 ? `SV.189` : "";
+            if (service === "AÉREO/RODOVIÁRIO/CARRO") {
+              svCodeTax = tax > 0 ? `SV.194` : "";
+              svCodeCommission = commission > 0 ? `SV.193` : "";
+            } else if (service === "HOTEL") {
+              svCodeTax = tax > 0 ? `SV.192` : "";
+              svCodeCommission = commission > 0 ? `SV.191` : "";
+            }
             typeDescription = "Compra Custo";
-          }
-
-          if (entry.service === "HOTEL") {
-            svCodeCommission = commission > 0 ? `SV.195` : "";
           }
 
           if (svCodeTax) {
