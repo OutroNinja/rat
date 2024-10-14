@@ -79,14 +79,12 @@ export async function programInitMenu() {
 
         const warnings: Array<{ type: string; message: string }> = [];
         const ccData: Array<{
-          cc: string;
+          cc: string | number;
           tax: number;
           commission: number;
           service: string;
           type: string;
         }> = [];
-
-        const tempSums: Record<string, { commission: number; tax: number; service: string; type: string }> = {};
 
         vollData[0].push("Comissão");
 
@@ -122,14 +120,13 @@ export async function programInitMenu() {
                         serviceKey = "AÉREO/RODOVIÁRIO/CARRO";
                       }
 
-                      const key = `${cc}-${serviceKey}`;
-
-                      if (!tempSums[key]) {
-                        tempSums[key] = { commission: 0, tax: 0, service: serviceKey, type: hcType };
-                      }
-
-                      tempSums[key].commission += commission;
-                      tempSums[key].tax += taxValue;
+                      ccData.push({
+                        cc,
+                        tax: taxValue,
+                        commission,
+                        service: serviceKey,
+                        type: hcType,
+                      });
 
                       vollData[rowIndex][26] = commission;
                       break;
@@ -155,32 +152,18 @@ export async function programInitMenu() {
                   serviceKey = "AÉREO/RODOVIÁRIO/CARRO";
                 }
 
-                const key = `${cc}-${serviceKey}`;
-
-                if (!tempSums[key]) {
-                  tempSums[key] = { commission: 0, tax: 0, service: serviceKey, type: "Despesa" };
-                }
-
-                tempSums[key].commission += commission;
-                tempSums[key].tax += taxValue;
+                ccData.push({
+                  cc,
+                  tax: taxValue,
+                  commission,
+                  service: serviceKey,
+                  type: "Despesa",
+                });
 
                 vollData[rowIndex][26] = commission;
               }
             }
           }
-        }
-
-        for (const key in tempSums) {
-            const { commission, tax, type } = tempSums[key];
-            const [cc, serviceValue] = key.split("-");
-
-          ccData.push({
-            cc,
-            service: serviceValue,
-            commission: parseFloat(commission.toFixed(2)),
-            type,
-            tax: parseFloat(tax.toFixed(2)),
-          });
         }
 
         const sapData: (string | number)[][] = [];
@@ -283,8 +266,6 @@ export async function programInitMenu() {
           }
           outro(ck.green("✅ Correções ignoradas com sucesso"));
         }
-
-        // For every notFound passanger asks the CC and update the sheet
 
         const sapSheet = vollWorkbook.Sheets["SAP"];
         const now = new Date();
