@@ -1,0 +1,56 @@
+{
+  "name": "rat-cli",
+  "type": "module",
+  "main": "build/index.js",
+  "bin": "build/index.js",
+  "scripts": {
+    "check": "tsc --noEmit && echo ✔ Ok",
+    "build": "tsc",
+    "dev": "tsx --env-file .env ./src/index.ts",
+    "dev:dev": "tsx --env-file .env.dev ./src/index.ts",
+    "watch": "tsx --watch --env-file .env ./src/index.ts",
+    "watch:dev": "tsx --watch --env-file .env.dev ./src/index.ts",
+    "start": "node --env-file .env ./build/index.js",
+    "start:dev": "node --env-file .env.dev ./build/index.js",
+    "pkg": "pkg . --targets node16-win-x64 --out-path dist"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.7.0",
+    "@types/string-similarity": "^4.0.2",
+    "@types/uuid": "^10.0.0",
+    "@types/xlsx": "^0.0.36",
+    "chalk": "^5.3.0",
+    "clear": "^0.1.0",
+    "clui": "^0.3.6",
+    "consola": "^3.2.3",
+    "figlet": "^1.7.0",
+    "string-similarity": "^4.0.4",
+    "tmp": "^0.2.3",
+    "uuid": "^10.0.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  },
+  "devDependencies": {
+    "@types/clear": "^0.1.4",
+    "@types/figlet": "^1.5.8",
+    "@types/node": "^20.14.10",
+    "@types/tmp": "^0.2.6",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.0",
+    "tsx": "4.8.0",
+    "typescript": "^5.5.3"
+  },
+  "imports": {
+    "#lib": [
+      "./build/lib/index.js"
+    ],
+    "#menus": [
+      "./build/menus/index.js"
+    ]
+  },
+  "pkg": {
+    "assets": [
+      "src/assets/template.xlsx"
+    ]
+  }
+}
